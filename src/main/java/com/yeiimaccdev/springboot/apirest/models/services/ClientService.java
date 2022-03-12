@@ -36,23 +36,8 @@ public class ClientService implements IClientService {
 
 	@Override
 	public Client update(Client client) {
-
-		if (client.getId() != null) {
-			Client newClient = this.findById(client.getId());
-
-			if (newClient != null) {
-				newClient.setFirstName(client.getFirstName());
-				newClient.setLastName(client.getLastName());
-				newClient.setEmail(client.getEmail());
-				
-				newClient.setUpdatedAt(new Date());
-
-				return clientDao.save(newClient);
-			}
-
-			return client;
-		}
-		return client;
+		client.setUpdatedAt(new Date());
+		return clientDao.save(client);			
 	}
 
 	@Override

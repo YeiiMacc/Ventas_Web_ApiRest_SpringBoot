@@ -43,7 +43,7 @@ public class ClientRestController {
 		try {
 			client = clientService.findById(id);
 		} catch (DataAccessException e) {
-			response.put("messagge", "Query error.");
+			response.put("messagge", "Error in data query.");
 			response.put("error", e.getMessage().concat(": ").concat(e.getMostSpecificCause().getMessage()));
 			return new ResponseEntity<Map<String, Object>>(response, HttpStatus.INTERNAL_SERVER_ERROR);
 		}
@@ -64,7 +64,7 @@ public class ClientRestController {
 		try {
 			newClient = clientService.save(client);
 		} catch (DataAccessException e) {
-			response.put("message", "Data insertion error");
+			response.put("message", "Error inserting data");
 			response.put("error", e.getMessage().concat(": ").concat(e.getMostSpecificCause().getMessage()) );
 			return new ResponseEntity<Map<String, Object>>(response, HttpStatus.INTERNAL_SERVER_ERROR);			
 		}
@@ -75,9 +75,32 @@ public class ClientRestController {
 	}
 	
 	@PutMapping("/update/{id}")
-	@ResponseStatus(HttpStatus.ACCEPTED)
-	public Client update(@RequestBody Client client) {
-		return clientService.update(client);
+	public ResponseEntity<?> update(@RequestBody Client client, @PathVariable Long id) {
+		Client dataClient = clientService.findById(id);
+		Client UpdatedClient = null;
+		Map<String, Object> response = new HashMap<>();
+		
+		if(dataClient == null) {
+			response.put("messagge", "Error - Cannot be edited, Client with ID: ".concat(id.toString().toString()).concat(" not found"));
+			return new ResponseEntity<Map<String, Object>>(response, HttpStatus.NOT_FOUND);
+		}
+		
+		try {
+			dataClient.setFirstName(client.getFirstName());
+			dataClient.setLastName(client.getLastName());
+			dataClient.setEmail(client.getEmail());
+			
+			UpdatedClient = clientService.save(dataClient);
+		} catch (DataAccessException e) {
+			response.put("messagge", "Error updating data");
+			response.put("error", e.getMessage().concat(": ").concat(e.getMostSpecificCause().getMessage()) );
+			return new ResponseEntity<Map<String, Object>>(response, HttpStatus.INTERNAL_SERVER_ERROR);		
+		}
+		
+		response.put("messagge", "Client Updated!");
+		response.put("client", UpdatedClient);
+				
+		return new ResponseEntity<Map<String, Object>>(response, HttpStatus.ACCEPTED);
 	}
 	
 	@DeleteMapping("/delete/{id}")
