@@ -43,13 +43,13 @@ public class ClientRestController {
 		try {
 			client = clientService.findById(id);
 		} catch (DataAccessException e) {
-			response.put("messagge", "Error in data query.");
+			response.put("message", "Error in data query.");
 			response.put("error", e.getMessage().concat(": ").concat(e.getMostSpecificCause().getMessage()));
 			return new ResponseEntity<Map<String, Object>>(response, HttpStatus.INTERNAL_SERVER_ERROR);
 		}
 		
 		if(client == null) {
-			response.put("messagge", "Error - Client with ID:".concat(id.toString().toString()).concat(" not found"));
+			response.put("message", "Error - Client with ID:".concat(id.toString().toString()).concat(" not found"));
 			return new ResponseEntity<Map<String, Object>>(response, HttpStatus.NOT_FOUND);
 		}
 		
@@ -69,7 +69,7 @@ public class ClientRestController {
 			return new ResponseEntity<Map<String, Object>>(response, HttpStatus.INTERNAL_SERVER_ERROR);			
 		}
 		
-		response.put("messagge", "New Client Created!");
+		response.put("message", "New Client Created!");
 		response.put("client", newClient);
 		return new ResponseEntity<Map<String, Object>>(response, HttpStatus.CREATED);
 	}
@@ -81,7 +81,7 @@ public class ClientRestController {
 		Map<String, Object> response = new HashMap<>();
 		
 		if(dataClient == null) {
-			response.put("messagge", "Error - Cannot be edited, Client with ID: ".concat(id.toString().toString()).concat(" not found"));
+			response.put("message", "Error - Cannot be edited, Client with ID: ".concat(id.toString().toString()).concat(" not found"));
 			return new ResponseEntity<Map<String, Object>>(response, HttpStatus.NOT_FOUND);
 		}
 		
@@ -92,20 +92,31 @@ public class ClientRestController {
 			
 			UpdatedClient = clientService.save(dataClient);
 		} catch (DataAccessException e) {
-			response.put("messagge", "Error updating data");
+			response.put("message", "Error updating data");
 			response.put("error", e.getMessage().concat(": ").concat(e.getMostSpecificCause().getMessage()) );
 			return new ResponseEntity<Map<String, Object>>(response, HttpStatus.INTERNAL_SERVER_ERROR);		
 		}
 		
-		response.put("messagge", "Client Updated!");
+		response.put("message", "Client Updated!");
 		response.put("client", UpdatedClient);
 				
 		return new ResponseEntity<Map<String, Object>>(response, HttpStatus.ACCEPTED);
 	}
 	
 	@DeleteMapping("/delete/{id}")
-	@ResponseStatus(HttpStatus.NO_CONTENT)
-	public void delete(@PathVariable Long id) {
-		clientService.delete(id);
+	public ResponseEntity<?> delete(@PathVariable Long id) {
+		Map<String, Object> response = new HashMap<>();
+		
+		try {
+			clientService.delete(id);
+		} catch (DataAccessException e) {
+			response.put("message", "Error deleting data");
+			response.put("error", e.getMessage().concat(": ").concat(e.getMostSpecificCause().getMessage()));
+			return new ResponseEntity<Map<String, Object>>(response, HttpStatus.INTERNAL_SERVER_ERROR);	
+		}
+		
+		response.put("message", "Client deleted!");
+		
+		return new ResponseEntity<Map<String, Object>>(response, HttpStatus.OK);
 	}
 }
