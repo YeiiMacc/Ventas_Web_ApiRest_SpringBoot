@@ -11,6 +11,9 @@ import javax.persistence.Id;
 import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
+import javax.validation.constraints.Email;
+import javax.validation.constraints.NotEmpty;
+import javax.validation.constraints.Size;
 
 @Entity
 @Table(name = "clients")
@@ -19,13 +22,18 @@ public class Client implements Serializable {
 	@Id
 	@GeneratedValue(strategy=GenerationType.IDENTITY)
 	private Long id;
-
+	
+	@NotEmpty
+	@Size(min = 3, max = 20)
 	@Column(name = "first_name", nullable = false)
 	private String firstName;
 
+	@NotEmpty
 	@Column(name = "last_name", nullable = false)
 	private String lastName;
 
+	@NotEmpty
+	@Email
 	@Column(nullable = false, unique = true)
 	private String email;
 
