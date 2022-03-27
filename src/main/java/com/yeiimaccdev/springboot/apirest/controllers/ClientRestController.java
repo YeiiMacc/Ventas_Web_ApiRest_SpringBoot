@@ -3,11 +3,15 @@ package com.yeiimaccdev.springboot.apirest.controllers;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
+
+import javax.validation.Valid;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataAccessException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -57,9 +61,18 @@ public class ClientRestController {
 	}
 	
 	@PostMapping("/save")
-	public ResponseEntity<?> create(@RequestBody Client client) {
+	public ResponseEntity<?> create(@Valid @RequestBody Client client, BindingResult result) {
 		Client newClient = null;
 		Map<String, Object> response = new HashMap<>();
+		
+		if(result.hasErrors()) {
+			List<String> errors = result.getFieldErrors()
+					.stream()
+					.map(err -> "Field '"+ err.getField() + "' "+ err.getDefaultMessage())
+					.collect(Collectors.toList());
+			response.put("errors", errors);
+			return new ResponseEntity<Map<String, Object>>(response, HttpStatus.BAD_REQUEST);
+		}
 		
 		try {
 			newClient = clientService.save(client);
@@ -75,10 +88,19 @@ public class ClientRestController {
 	}
 	
 	@PutMapping("/update/{id}")
-	public ResponseEntity<?> update(@RequestBody Client client, @PathVariable Long id) {
+	public ResponseEntity<?> update(@Valid @RequestBody Client client, BindingResult result , @PathVariable Long id) {
 		Client dataClient = clientService.findById(id);
 		Client UpdatedClient = null;
 		Map<String, Object> response = new HashMap<>();
+		
+		if(result.hasErrors()) {
+			List<String> errors = result.getFieldErrors()
+					.stream()
+					.map(err -> "Field '"+ err.getField() + "' "+ err.getDefaultMessage())
+					.collect(Collectors.toList());
+			response.put("errors", errors);
+			return new ResponseEntity<Map<String, Object>>(response, HttpStatus.BAD_REQUEST);
+		}
 		
 		if(dataClient == null) {
 			response.put("message", "Error - Cannot be edited, Client with ID: ".concat(id.toString().toString()).concat(" not found"));
